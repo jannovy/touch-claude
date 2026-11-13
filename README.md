@@ -12,11 +12,19 @@ input / output tokens over the last 24 hours.
 ![Expanded view](docs/expanded.png)
 
 Colours follow the limit: orange below 70 %, yellow from 70 %, red from 90 %.
-A `✳︎` item in the menu bar shows the same numbers and lets you refresh or quit.
+
+**Menu bar** – the same content as the Touch Bar, with the numbers, refresh and quit in its menu.
+By default it shows the whole detail view (limits, reset times and the token chart), so the app
+is just as useful on a Mac without a Touch Bar. Turn off **Show Details in Menu Bar** in the menu
+to shrink it to the two limits only.
+
+![Menu bar item](docs/menu-bar.png)
+
+The detailed item is about 320 pt wide; macOS hides menu bar items that do not fit next to the notch.
 
 ## Requirements
 
-- A MacBook Pro with a Touch Bar
+- A MacBook Pro with a Touch Bar – or any Mac, using the menu bar only
 - macOS 13 or newer, Xcode Command Line Tools (`xcode-select --install`) – full Xcode is not needed
 - [Claude Code](https://claude.com/claude-code) with a Pro or Max subscription, and `jq`
 
@@ -63,3 +71,4 @@ ClaudeUsageBar [--source file|oauth|demo] [--file path] [--once] [--expanded]
   Keychain instead of the status line file. Untested.
 - `--once` – print the current numbers and exit
 - `--expanded` – open the detail view on launch
+- `-menuBarFull YES|NO` – override the "Show Details in Menu Bar" setting for this run

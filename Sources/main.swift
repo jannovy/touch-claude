@@ -51,6 +51,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var lastError: String?
     private var touchBarAvailable = false
     private var fetching = false
+    private var appearanceObservation: NSKeyValueObservation?
+
+    /// Whether the menu bar shows everything the expanded Touch Bar does, not just the summary.
+    /// On until the user turns it off in the menu.
+    private var menuBarFull: Bool {
+        get {
+            let defaults = UserDefaults.standard
+            return defaults.object(forKey: "menuBarFull") == nil || defaults.bool(forKey: "menuBarFull")
+        }
+        set { UserDefaults.standard.set(newValue, forKey: "menuBarFull") }
+    }
 
     init(source: UsageSource) {
         self.source = source
@@ -67,6 +78,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
+        // The menu bar turns light or dark with the wallpaper; redraw in matching colours.
+        appearanceObservation = statusItem.button?.observe(\.effectiveAppearance) { [weak self] _, _ in
+            DispatchQueue.main.async { self?.render() }
+        }
 
         refresh()
         if startExpanded {
@@ -116,6 +131,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func render() {
         touchBar.update(usage: usage, note: usage == nil ? lastError : nil, tokens: tokens)
+
+        guard let button = statusItem.button else { return }
+        if let usage, !usage.limits.isEmpty {
+            let dark = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            button.image = menuBarImage(usage: usage, tokens: tokens, full: menuBarFull, dark: dark)
+            button.title = ""
+        } else {
+            button.image = nil
+            button.title = "✳︎"
+        }
+    }
+
+    @objc private func toggleMenuBarFull() {
+        menuBarFull.toggle()
+        render()
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -141,6 +171,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(withTitle: "⚠︎ Touch Bar item could not be installed", action: nil, keyEquivalent: "")
         }
         menu.addItem(.separator())
+        let full = menu.addItem(withTitle: "Show Details in Menu Bar", action: #selector(toggleMenuBarFull),
+                                keyEquivalent: "")
+        full.target = self
+        full.state = menuBarFull ? .on : .off
         menu.addItem(withTitle: "Refresh", action: #selector(refresh), keyEquivalent: "r").target = self
         menu.addItem(withTitle: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
