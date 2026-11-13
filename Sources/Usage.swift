@@ -94,8 +94,6 @@ struct DemoSource: UsageSource {
                   resetsAt: Date().addingTimeInterval(2 * 3600 + 14 * 60)),
             Limit(key: "seven_day", label: "Week", short: "7d", rawPercent: 74,
                   resetsAt: Date().addingTimeInterval(3 * 86400)),
-            Limit(key: "seven_day_opus", label: "Week · Opus", short: "Op", rawPercent: 93,
-                  resetsAt: Date().addingTimeInterval(3 * 86400)),
         ]
         return Usage(limits: limits, fetchedAt: Date())
     }
